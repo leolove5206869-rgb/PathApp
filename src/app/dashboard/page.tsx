@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { logout } from '@/app/actions/auth'
+import { createReport } from '@/app/actions/report'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -36,7 +38,9 @@ export default async function DashboardPage() {
                         <h2 className="text-2xl font-semibold tracking-tight">Your Reports</h2>
                         <p className="text-sm text-gray-500 mt-1">Manage and view your generated individual path reports.</p>
                     </div>
-                    <Button>+ Generate New Report</Button>
+                    <form action={createReport}>
+                        <Button type="submit">+ Generate New Report</Button>
+                    </form>
                 </div>
 
                 {reports && reports.length === 0 ? (
@@ -44,7 +48,9 @@ export default async function DashboardPage() {
                         <h3 className="mt-2 text-sm font-semibold text-gray-900">No reports</h3>
                         <p className="mt-1 text-sm text-gray-500">Get started by generating your first path report.</p>
                         <div className="mt-6">
-                            <Button>+ Generate New Report</Button>
+                            <form action={createReport}>
+                                <Button type="submit">+ Generate New Report</Button>
+                            </form>
                         </div>
                     </div>
                 ) : (
@@ -54,8 +60,9 @@ export default async function DashboardPage() {
                                 <h3 className="font-medium text-lg mb-1">{report.title}</h3>
                                 <p className="text-sm text-gray-500 line-clamp-2">{report.core_concept || 'No description provided.'}</p>
                                 <div className="mt-4 flex gap-2">
-                                    <Button variant="outline" size="sm" className="w-full">View</Button>
-                                    <Button variant="outline" size="sm" className="w-full">Edit</Button>
+                                    <Link href={`/editor/${report.id}`} className="w-full">
+                                        <Button variant="outline" size="sm" className="w-full">Edit</Button>
+                                    </Link>
                                 </div>
                             </div>
                         ))}
