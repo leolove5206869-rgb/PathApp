@@ -5,43 +5,57 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export async function login(formData: FormData) {
-    const supabase = await createClient()
+    let errorMessage = '';
+    try {
+        const supabase = await createClient();
 
-    const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+        const data = {
+            email: formData.get('email') as string,
+            password: formData.get('password') as string,
+        };
+
+        const { error } = await supabase.auth.signInWithPassword(data);
+
+        if (error) {
+            errorMessage = error.message;
+        }
+    } catch (err: any) {
+        errorMessage = err.message || 'An unexpected error occurred';
     }
 
-    const { error } = await supabase.auth.signInWithPassword(data)
-
-    if (error) {
-        return redirect('/login?message=Could not authenticate user')
+    if (errorMessage) {
+        return redirect(`/login?message=${encodeURIComponent(errorMessage)}`);
     }
 
-    revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    revalidatePath('/', 'layout');
+    redirect('/dashboard');
 }
 
 export async function signup(formData: FormData) {
-    const supabase = await createClient()
+    let errorMessage = '';
+    try {
+        const supabase = await createClient();
 
-    const data = {
-        email: formData.get('email') as string,
-        password: formData.get('password') as string,
+        const data = {
+            email: formData.get('email') as string,
+            password: formData.get('password') as string,
+        };
+
+        const { error } = await supabase.auth.signUp(data);
+
+        if (error) {
+            errorMessage = error.message;
+        }
+    } catch (err: any) {
+        errorMessage = err.message || 'An unexpected error occurred';
     }
 
-    // Need to use the email redirect to point it to the Auth Callback route
-    const { error } = await supabase.auth.signUp(data)
-
-    if (error) {
-        console.error(error)
-        return redirect('/login?message=Could not create user')
+    if (errorMessage) {
+        return redirect(`/login?message=${encodeURIComponent(errorMessage)}`);
     }
 
-    // Redirecting to login since we disabled confirm email. 
-    // It should automatically log them in or they can just login.
-    revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    revalidatePath('/', 'layout');
+    redirect('/dashboard');
 }
 
 export async function logout() {
